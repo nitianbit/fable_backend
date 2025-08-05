@@ -8,7 +8,7 @@ module.exports = {
 
       let perPage = 6;
       let page = 1;
-      if (req.query.page != "") {
+      if (req.query.perPage != "") {
         perPage = req.query.perPage;
       }
 
@@ -20,8 +20,8 @@ module.exports = {
         {
           $match: { userId, read: 0 },
         },
-        { $limit: parseInt(page) + parseInt(perPage) },
-        { $skip: parseInt(page) },
+        { $skip: (parseInt(page)-1)*parseInt(perPage)},
+        { $limit:  parseInt(perPage) },
         {
           $sort: { createdAt: -1 },
         },
