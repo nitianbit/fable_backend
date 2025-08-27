@@ -4,6 +4,9 @@ const { HelperTimeZone } = require('../helpers');
 
 const authenticate = async (req, res, next) => {
   try {
+    if(!req.headers?.authorization){
+      throw new Error('Request token is invalid.')
+    }
     const token= req.headers.authorization.split(" ")[1];
     if (typeof token !== 'string') {
       throw new Error('Request token is invalid.');
