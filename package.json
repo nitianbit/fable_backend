@@ -6,7 +6,9 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "dev": "nodemon server.js",
-        "start": "cross-env TZ='Africa/Cairo' NODE_ENV=production  pm2 start -i max server.js --cron-restart='* */12 * * *' --name=gosmartAPI"
+        "start": "cross-env TZ='Africa/Cairo' NODE_ENV=production  pm2 start -i max server.js --cron-restart='* */12 * * *' --name=gosmartAPI",
+        "populate-locations": "node docs/run-to-populate-data-in-db/populate_locations.js",
+        "populate-routes": "node docs/run-to-populate-data-in-db/populate_routes_data.js"
     },
     "keywords": [],
     "author": "",
