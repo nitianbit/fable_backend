@@ -1,26 +1,65 @@
-# Frontend Route Search Flow and API Sequence
+# Complete Bus Booking Flow
 
-## Overview
+Here's the full end-to-end bus booking process from user search to payment completion:
 
-When a user searches for routes in the frontend, there's a specific sequence of API calls that need to be made to complete the booking process. Here's the complete flow:
+## 1. Location Search
 
-## 1. Initial Route Search
+### API: `/api/v1/location` (POST)
+**Purpose**: Search for locations by city name or title
 
-### API Call: `/api/v1/route-search`
-**Method:** POST
-
-**Request Body:**
 ```json
+// Request
 {
-  "pickup_city": "Delhi",
-  "drop_city": "Dehradun", 
-  "current_date": "2025-08-30",
-  "current_time": "07:00"
+  "address": "Delhi",
+  "limit": 10
+}
+
+// Response
+{
+  "status": true,
+  "message": "Successfully found location",
+  "data": [
+    {
+      "id": "5f8d0d5f8f5c1a0017e7e8a1",
+      "title": "Delhi ISBT",
+      "location_address": "ISBT Kashmiri Gate, Delhi",
+      "location_latitude": 28.675702,
+      "location_longitude": 77.229585,
+      "city": "Delhi",
+      "state": "Delhi",
+      "type": "location"
+    }
+  ]
 }
 ```
 
-**Response:**
+## 2. Route Search
+
+### API: `/api/v1/route-search` (POST)
+**Purpose**: Find available routes between locations
+
 ```json
+// Request - City-based search
+{
+  "pickup_city": "Delhi",
+  "drop_city": "Dehradun",
+  "current_date": "2025-08-30",
+  "current_time": "07:00"
+}
+
+// Request - Coordinate-based search
+{
+  "pickup_lat": 28.675702,
+  "pickup_long": 77.229585,
+  "pickup_id": "5f8d0d5f8f5c1a0017e7e8a1",
+  "drop_lat": 30.327890,
+  "drop_long": 78.043210,
+  "drop_id": "5f8d0d5f8f5c1a0017e7e8a3",
+  "current_date": "2025-08-30",
+  "current_time": "07:00"
+}
+
+// Response
 {
   "status": true,
   "message": "Successfully found route",
@@ -57,45 +96,95 @@ When a user searches for routes in the frontend, there's a specific sequence of 
 }
 ```
 
-## 2. After Route Search - Next API Calls
+## 3. Route Details (Optional)
 
-Once the user gets the route search results, they need to proceed with the following sequence:
+### API: `/api/v1/:routeId` (POST)
+**Purpose**: Get detailed information about all stops on a route
 
-### Step 1: Get Route Details (Optional)
-**API Call:** `/api/v1/:routeId`
-**Method:** POST
-
-**Request Body:**
 ```json
+// Request
 {
   "pickup_stop_id": "5f8d0d5f8f5c1a0017e7e8a1",
   "drop_stop_id": "5f8d0d5f8f5c1a0017e7e8a3"
 }
+
+// Response includes detailed stop information for the route
 ```
 
-This returns detailed information about all stops on the route.
+## 4. Bus Layout and Seat Selection
 
-### Step 2: Generate Fare for Selected Seats
-**API Call:** `/api/v1/fare/generate-seat-fare`
-**Method:** POST
-**Authentication:** Required
+### API: `/api/v1/bus/:busId` (POST)
+**Purpose**: Get bus seat layout with availability status
 
-**Request Body:**
 ```json
+// Request
+{
+  "busschedule_id": "5f8d0d5f8f5c1a0017e7e931",
+  "route_id": "5f8d0d5f8f5c1a0017e7e911",
+  "pickup_stop_id": "5f8d0d5f8f5c1a0017e7e8a1",
+  "drop_stop_id": "5f8d0d5f8f5c1a0017e7e8a3",
+  "type": "default",
+  "has_return": "0",
+  "current_date": "2025-08-30",
+  "end_date": ""
+}
+
+// Response
+{
+  "status": true,
+  "message": "Successfully found bus seats",
+  "data": {
+    "id": "5f8d0d5f8f5c1a0017e7e901",
+    "bus_name": "Delhi Dehradun Express",
+    "bus_brand": "Volvo",
+    "bus_model_no": "VOLVO-9400",
+    "bus_amenities": ["AC", "WIFI", "WATER", "BLANKET"],
+    "bus_type": "AC_SEATER",
+    "bus_reg_no": "DL01AB1234",
+    "buslayoutId": {
+      "id": "layout_id",
+      "max_seats": "40",
+      "layout": "1 X 1",
+      "name": "Standard Layout",
+      "combine_seats": [
+        [
+          {
+            "seat_no": "A1",
+            "seat_status": "empty"
+          },
+          {
+            "seat_no": "A2", 
+            "seat_status": "booked"
+          }
+        ]
+      ]
+    },
+    "final_total_fare": "500",
+    "tax": "18",
+    "tax_amount": "90"
+  }
+}
+```
+
+## 5. Fare Calculation
+
+### API: `/api/v1/fare/generate-seat-fare` (POST)
+**Purpose**: Calculate exact fare for selected seats
+
+```json
+// Request
 {
   "busschedule_id": "5f8d0d5f8f5c1a0017e7e931",
   "route_id": "5f8d0d5f8f5c1a0017e7e911",
   "bus_id": "5f8d0d5f8f5c1a0017e7e901",
   "pickup_stop_id": "5f8d0d5f8f5c1a0017e7e8a1",
   "drop_stop_id": "5f8d0d5f8f5c1a0017e7e8a3",
-  "seat_no": "[A1,A2]",
+  "seat_no": "[A1,B1]",
   "has_return": "0",
   "start_date": "2025-08-30"
 }
-```
 
-**Response:**
-```json
+// Response
 {
   "status": true,
   "message": "Successfully generate fare.",
@@ -113,7 +202,7 @@ This returns detailed information about all stops on the route.
     "drop_time": "12:00",
     "distance": "250",
     "has_return": "0",
-    "seat_no": "[A1,A2]",
+    "seat_no": "[A1,B1]",
     "no_of_seats": 2,
     "sub_total": "1000",
     "final_total_fare": "1180",
@@ -124,13 +213,13 @@ This returns detailed information about all stops on the route.
 }
 ```
 
-### Step 3: Create Booking
-**API Call:** `/api/v1/booking/create`
-**Method:** POST
-**Authentication:** Required
+## 6. Booking Creation
 
-**Request Body:**
+### API: `/api/v1/booking/create` (POST) - Requires Authentication
+**Purpose**: Create booking with passenger details
+
 ```json
+// Request
 {
   "fareData": {
     "pnr_no": "PNR123456789",
@@ -140,7 +229,7 @@ This returns detailed information about all stops on the route.
     "bus_id": "5f8d0d5f8f5c1a0017e7e901",
     "pickup_stop_id": "5f8d0d5f8f5c1a0017e7e8a1",
     "drop_stop_id": "5f8d0d5f8f5c1a0017e7e8a3",
-    "seat_no": "[A1,A2]",
+    "seat_no": "[A1,B1]",
     "has_return": "0",
     "pickup_time": "06:00",
     "drop_time": "12:00",
@@ -159,18 +248,16 @@ This returns detailed information about all stops on the route.
       "seat_no": "A1"
     },
     {
-      "name": "Jane Doe", 
+      "name": "Jane Doe",
       "age": "28",
-      "gender": "Female",
-      "seat_no": "A2"
+      "gender": "Female", 
+      "seat_no": "B1"
     }
   ],
   "offer_code": ""
 }
-```
 
-**Response:**
-```json
+// Response
 {
   "status": true,
   "message": "Successfully booked ticket",
@@ -187,15 +274,9 @@ This returns detailed information about all stops on the route.
     "persistedPassenger": [
       {
         "name": "John Doe",
-        "age": "30", 
+        "age": "30",
         "gender": "Male",
         "seat_no": "A1"
-      },
-      {
-        "name": "Jane Doe",
-        "age": "28",
-        "gender": "Female", 
-        "seat_no": "A2"
       }
     ],
     "walletBalance": "5000"
@@ -203,23 +284,29 @@ This returns detailed information about all stops on the route.
 }
 ```
 
-### Step 4: Make Payment
-**API Call:** `/api/v1/booking/payment`
-**Method:** POST
-**Authentication:** Required
+## 7. Payment Processing
 
-**Request Body:**
+### API: `/api/v1/booking/payment` (POST) - Requires Authentication
+**Purpose**: Process payment for the booking
+
 ```json
+// Request for Wallet Payment
 {
   "amount": "1180",
   "pnr_no": "PNR123456789",
-  "payment_mode": "WALLET", // or "UPI", "CARD", "PAYTM"
+  "payment_mode": "WALLET",
   "date": "2025-08-30"
 }
-```
 
-**For Wallet Payment Response:**
-```json
+// Request for Online Payment
+{
+  "amount": "1180",
+  "pnr_no": "PNR123456789",
+  "payment_mode": "UPI", // or "CARD", "PAYTM"
+  "date": "2025-08-30"
+}
+
+// Response for Wallet Payment
 {
   "status": true,
   "message": "booking payment successful with wallet.",
@@ -228,10 +315,8 @@ This returns detailed information about all stops on the route.
     "amount": "1180"
   }
 }
-```
 
-**For Online Payment Response:**
-```json
+// Response for Online Payment
 {
   "status": true,
   "message": "successfully generate booking order.",
@@ -258,23 +343,21 @@ This returns detailed information about all stops on the route.
 }
 ```
 
-### Step 5: Payment Verification (For Online Payments)
-**API Call:** `/api/v1/booking/payment-verify`
-**Method:** POST
-**Authentication:** Required
+## 8. Payment Verification (For Online Payments)
 
-**Request Body:**
+### API: `/api/v1/booking/payment-verify` (POST) - Requires Authentication
+**Purpose**: Verify online payment completion
+
 ```json
+// Request
 {
   "orderId": "order_xyz123",
   "paymentId": "pay_abc123",
   "signature": "signature_hash",
   "status": "true"
 }
-```
 
-**Response:**
-```json
+// Response
 {
   "status": true,
   "message": "payment verified successfully.",
@@ -288,40 +371,33 @@ This returns detailed information about all stops on the route.
 
 ## Complete Frontend Flow Summary
 
-1. **Search Routes** → Get available routes with bus details and timings
-2. **Select Route & Seats** → User chooses preferred route and seats
-3. **Generate Fare** → Calculate total fare including taxes and fees
-4. **Create Booking** → Save booking with passenger details (status: PROCESSING)
-5. **Make Payment** → Process payment via wallet or online gateway
-6. **Verify Payment** → Confirm payment success (status: SCHEDULED)
+1. **Search Locations** → User enters pickup/drop cities
+2. **Search Routes** → System finds available routes with timings
+3. **Select Route** → User chooses preferred route and bus
+4. **View Seat Layout** → System shows bus layout with available seats
+5. **Select Seats** → User selects desired seats
+6. **Calculate Fare** → System calculates exact fare for selected seats
+7. **Enter Passenger Details** → User provides passenger information
+8. **Create Booking** → System creates booking (status: PROCESSING)
+9. **Make Payment** → User pays via wallet or online payment gateway
+10. **Verify Payment** → System confirms payment and updates booking status to SCHEDULED
 
-## Important Notes
+## Security Considerations
 
-### Bus Schedules vs Bus Schedule Locations
+1. **Server-Side Fare Calculation**: All pricing should be calculated server-side to prevent manipulation
+2. **Authentication**: Most APIs require user authentication
+3. **Seat Availability**: Real-time seat availability checking prevents overbooking
+4. **Payment Verification**: Online payments require server-side verification
+5. **Data Validation**: All inputs are validated server-side
 
-- **Bus Schedules**: Contains overall route timing and operational days
-- **Bus Schedule Locations**: Contains specific arrival/departure times for each stop
+## Error Handling
 
-The `departure_time` and `arrival_time` in bus_schedules represent the overall journey time, while bus_schedule_locations contain granular stop-by-stop timings. Both are important:
-
-- Bus schedules help filter routes by operational days and overall timing
-- Bus schedule locations provide exact pickup/drop times for passengers
-
-### Authentication Requirements
-
-Most APIs after route search require user authentication:
-- `/api/v1/fare/generate-seat-fare` - Requires auth
-- `/api/v1/booking/create` - Requires auth  
-- `/api/v1/booking/payment` - Requires auth
-- `/api/v1/booking/payment-verify` - Requires auth
-
-### Error Handling
-
-Each API call should handle potential errors:
+Each step includes proper error handling:
 - Route not found
 - Seats unavailable
 - Insufficient wallet balance
 - Payment failures
 - Network timeouts
+- Invalid input data
 
-The frontend should implement proper error handling and user feedback for each step in the booking process.
+This complete flow ensures a secure, user-friendly booking experience with proper validation at each step.
