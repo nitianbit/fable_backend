@@ -1,0 +1,163 @@
+{
+  "buses": [
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e901",
+      "code": "DL-DEH-001",
+      "name": "Delhi Dehradun Express",
+      "reg_no": "DL01AB1234",
+      "brand": "Volvo",
+      "model_no": "VOLVO-9400",
+      "chassis_no": "VOLVO9400DLDEH001",
+      "amenities": ["AC", "WIFI", "WATER", "BLANKET"],
+      "status": true
+    },
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e902",
+      "code": "DL-DEH-002",
+      "name": "Delhi Dehradun Deluxe",
+      "reg_no": "DL01CD5678",
+      "brand": "Scania",
+      "model_no": "SCANIA-INTERLINK",
+      "chassis_no": "SCANIAINTERDLDEH002",
+      "amenities": ["AC", "WIFI", "WATER", "BLANKET", "CHARGING"],
+      "status": true
+    }
+  ],
+  "routes": [
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e911",
+      "locationId": "5f8d0d5f8f5c1a0017e7e8a1",
+      "title": "Delhi to Dehradun Route",
+      "busId": "5f8d0d5f8f5c1a0017e7e901",
+      "status": true
+    },
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e912",
+      "locationId": "5f8d0d5f8f5c1a0017e7e8a3",
+      "title": "Dehradun to Delhi Route",
+      "busId": "5f8d0d5f8f5c1a0017e7e902",
+      "status": true
+    }
+  ],
+  "route_stops": [
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e921",
+      "routeId": "5f8d0d5f8f5c1a0017e7e911",
+      "stopId": "5f8d0d5f8f5c1a0017e7e8a1",
+      "order": 1,
+      "minimum_fare_pickup": "0",
+      "minimum_fare_drop": "0",
+      "price_per_km_drop": "15",
+      "price_per_km_pickup": "15"
+    },
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e922",
+      "routeId": "5f8d0d5f8f5c1a0017e7e911",
+      "stopId": "5f8d0d5f8f5c1a0017e7e8a3",
+      "order": 2,
+      "minimum_fare_pickup": "0",
+      "minimum_fare_drop": "0",
+      "price_per_km_drop": "15",
+      "price_per_km_pickup": "15"
+    },
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e923",
+      "routeId": "5f8d0d5f8f5c1a0017e7e912",
+      "stopId": "5f8d0d5f8f5c1a0017e7e8a3",
+      "order": 1,
+      "minimum_fare_pickup": "0",
+      "minimum_fare_drop": "0",
+      "price_per_km_drop": "15",
+      "price_per_km_pickup": "15"
+    },
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e924",
+      "routeId": "5f8d0d5f8f5c1a0017e7e912",
+      "stopId": "5f8d0d5f8f5c1a0017e7e8a1",
+      "order": 2,
+      "minimum_fare_pickup": "0",
+      "minimum_fare_drop": "0",
+      "price_per_km_drop": "15",
+      "price_per_km_pickup": "15"
+    }
+  ],
+  "bus_schedules": [
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e931",
+      "routeId": "5f8d0d5f8f5c1a0017e7e911",
+      "busId": "5f8d0d5f8f5c1a0017e7e901",
+      "departure_time": "2025-08-30T06:00:00.000Z",
+      "arrival_time": "2025-08-30T12:00:00.000Z",
+      "every": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+      "start_date": "2025-08-01T00:00:00.000Z",
+      "end_date": "2026-08-01T00:00:00.000Z",
+      "status": true
+    },
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e932",
+      "routeId": "5f8d0d5f8f5c1a0017e7e911",
+      "busId": "5f8d0d5f8f5c1a0017e7e901",
+      "departure_time": "2025-08-30T14:00:00.000Z",
+      "arrival_time": "2025-08-30T20:00:00.000Z",
+      "every": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+      "start_date": "2025-08-01T00:00:00.000Z",
+      "end_date": "2026-08-01T00:00:00.000Z",
+      "status": true
+    },
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e933",
+      "routeId": "5f8d0d5f8f5c1a0017e7e912",
+      "busId": "5f8d0d5f8f5c1a0017e7e902",
+      "departure_time": "2025-08-30T08:00:00.000Z",
+      "arrival_time": "2025-08-30T14:00:00.000Z",
+      "every": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+      "start_date": "2025-08-01T00:00:00.000Z",
+      "end_date": "2026-08-01T00:00:00.000Z",
+      "status": true
+    }
+  ],
+  "bus_schedule_locations": [
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e941",
+      "busScheduleId": "5f8d0d5f8f5c1a0017e7e931",
+      "stopId": "5f8d0d5f8f5c1a0017e7e8a1",
+      "departure_time": "2025-08-30T06:00:00.000Z",
+      "arrival_time": "2025-08-30T06:00:00.000Z"
+    },
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e942",
+      "busScheduleId": "5f8d0d5f8f5c1a0017e7e931",
+      "stopId": "5f8d0d5f8f5c1a0017e7e8a3",
+      "departure_time": "2025-08-30T12:00:00.000Z",
+      "arrival_time": "2025-08-30T12:00:00.000Z"
+    },
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e943",
+      "busScheduleId": "5f8d0d5f8f5c1a0017e7e932",
+      "stopId": "5f8d0d5f8f5c1a0017e7e8a1",
+      "departure_time": "2025-08-30T14:00:00.000Z",
+      "arrival_time": "2025-08-30T14:00:00.000Z"
+    },
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e944",
+      "busScheduleId": "5f8d0d5f8f5c1a0017e7e932",
+      "stopId": "5f8d0d5f8f5c1a0017e7e8a3",
+      "departure_time": "2025-08-30T20:00:00.000Z",
+      "arrival_time": "2025-08-30T20:00:00.000Z"
+    },
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e945",
+      "busScheduleId": "5f8d0d5f8f5c1a0017e7e933",
+      "stopId": "5f8d0d5f8f5c1a0017e7e8a3",
+      "departure_time": "2025-08-30T08:00:00.000Z",
+      "arrival_time": "2025-08-30T08:00:00.000Z"
+    },
+    {
+      "_id": "5f8d0d5f8f5c1a0017e7e946",
+      "busScheduleId": "5f8d0d5f8f5c1a0017e7e933",
+      "stopId": "5f8d0d5f8f5c1a0017e7e8a1",
+      "departure_time": "2025-08-30T14:00:00.000Z",
+      "arrival_time": "2025-08-30T14:00:00.000Z"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+[
+  {
+    "_id": "5f8d0d5f8f5c1a0017e7e8a1",
+    "title": "Delhi ISBT",
+    "type": "DA",
+    "location": {
+      "type": "Point",
+      "address": "ISBT Kashmiri Gate, Delhi",
+      "coordinates": [77.229585, 28.675702],
+      "title": "Delhi ISBT"
+    },
+    "city": "Delhi",
+    "state": "Delhi",
+    "status": true
+  },
+  {
+    "_id": "5f8d0d5f8f5c1a0017e7e8a2",
+    "title": "Delhi Airport",
+    "type": "DA",
+    "location": {
+      "type": "Point",
+      "address": "Indira Gandhi International Airport, Delhi",
+      "coordinates": [77.099957, 28.556162],
+      "title": "Delhi Airport"
+    },
+    "city": "Delhi",
+    "state": "Delhi",
+    "status": true
+  },
+  {
+    "_id": "5f8d0d5f8f5c1a0017e7e8a3",
+    "title": "Dehradun ISBT",
+    "type": "DA",
+    "location": {
+      "type": "Point",
+      "address": "ISBT Dehradun, Uttarakhand",
+      "coordinates": [78.043210, 30.327890],
+      "title": "Dehradun ISBT"
+    },
+    "city": "Dehradun",
+    "state": "Uttarakhand",
+    "status": true
+  },
+  {
+    "_id": "5f8d0d5f8f5c1a0017e7e8a4",
+    "title": "Dehradun Railway Station",
+    "type": "DA",
+    "location": {
+      "type": "Point",
+      "address": "Dehradun Railway Station, Uttarakhand",
+      "coordinates": [78.053210, 30.317890],
+      "title": "Dehradun Railway Station"
+    },
+    "city": "Dehradun",
+    "state": "Uttarakhand",
+    "status": true
+  },
+  {
+    "_id": "5f8d0d5f8f5c1a0017e7e8a5",
+    "title": "Mumbai CST",
+    "type": "DA",
+    "location": {
+      "type": "Point",
+      "address": "Chhatrapati Shivaji Terminus, Mumbai",
+      "coordinates": [72.877656, 19.075984],
+      "title": "Mumbai CST"
+    },
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "status": true
+  },
+  {
+    "_id": "5f8d0d5f8f5c1a0017e7e8a6",
+    "title": "Bangalore ISBT",
+    "type": "DA",
+    "location": {
+      "type": "Point",
+      "address": "ISBT Bangalore, Karnataka",
+      "coordinates": [77.594563, 12.971599],
+      "title": "Bangalore ISBT"
+    },
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "status": true
+  }
+]
