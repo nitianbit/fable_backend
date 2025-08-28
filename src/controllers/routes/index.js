@@ -43,6 +43,8 @@ module.exports = {
         drop_lat,
         drop_long,
         drop_id,
+        pickup_city,
+        drop_city,
         search_type,
         current_date,
         end_date,
@@ -50,19 +52,32 @@ module.exports = {
         type,
       } = req.body;
 
-    
-
-      /**    var day = moment(current_date)
-        .tz(DEFAULT_TIMEZONE)
-        .format("dddd")
-        .toLowerCase();
-      if (day === "saturday") {
-        day = "monday";
-        current_date = moment(current_date).add(2, "days").format("YYYY-MM-DD");
-      } else if (day === "sunday") {
-        day = "monday";
-        current_date = moment(current_date).add(1, "days").format("YYYY-MM-DD");
-      } **/
+      // If city names are provided, find locations by city
+      if (pickup_city) {
+        const pickupLocation = await Location.findOne({
+          city: { $regex: pickup_city, $options: 'i' },
+          status: true
+        }).lean();
+        
+        if (pickupLocation) {
+          pickup_id = pickupLocation._id.toString();
+          pickup_lat = pickupLocation.location.coordinates[1];
+          pickup_long = pickupLocation.location.coordinates[0];
+        }
+      }
+      
+      if (drop_city) {
+        const dropLocation = await Location.findOne({
+          city: { $regex: new RegExp(drop_city, 'i') },
+          status: true
+        }).lean();
+        
+        if (dropLocation) {
+          drop_id = dropLocation._id.toString();
+          drop_lat = dropLocation.location.coordinates[1];
+          drop_long = dropLocation.location.coordinates[0];
+        }
+      }
 
       const getnearestData = await busSchedule.nearestData(
         parseFloat(pickup_long),

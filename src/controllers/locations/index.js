@@ -67,11 +67,22 @@ module.exports = {
   searchlocation: async (req, res) => {
     try {
       const address = req.body.address;
+      const limit = parseInt(req.body.limit ?? 5)
       var searchname = {
-        title: {
-          $regex: "(s+" + address + "|^" + address + ")",
-          $options: "i",
-        },
+        $or: [
+          {
+            title: {
+              $regex: "(s+" + address + "|^" + address + ")",
+              $options: "i",
+            }
+          },
+          {
+            city: {
+              $regex: "(s+" + address + "|^" + address + ")",
+              $options: "i",
+            }
+          }
+        ],
         status:true
       };
 
@@ -101,7 +112,7 @@ module.exports = {
           },
         },
         {
-          $limit: parseInt(req.body.limit),
+          $limit: parseInt(limit),
         },
       ]);
 
