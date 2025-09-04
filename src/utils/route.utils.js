@@ -71,14 +71,19 @@ module.exports = {
 
     console.log("seatExists",seatExists);
 
-    const left_1 = data[0];
-    const left_2 = data[1];
-    const left_3 = data[2];
-    const right_1 = data[3];
-    const right_2 = data[4];
-    const right_3 = data[5];
+    // Ensure data is an array
+    if (!Array.isArray(data)) {
+      return [[], [], [], [], [], []];
+    }
 
-    left_1.map((d) => {
+    const left_1 = Array.isArray(data[0]) ? data[0] : [];
+    const left_2 = Array.isArray(data[1]) ? data[1] : [];
+    const left_3 = Array.isArray(data[2]) ? data[2] : [];
+    const right_1 = Array.isArray(data[3]) ? data[3] : [];
+    const right_2 = Array.isArray(data[4]) ? data[4] : [];
+    const right_3 = Array.isArray(data[5]) ? data[5] : [];
+
+    left_1.forEach((d) => {
       var seat_status =
         seatExists.length > 0 && seatExists.includes(d.seat_no)
           ? "booked"
@@ -86,35 +91,35 @@ module.exports = {
       d.seat_status = seat_status;
     });
 
-    left_2.map((d) => {
+    left_2.forEach((d) => {
       var seat_status =
         seatExists.length > 0 && seatExists.includes(d.seat_no)
           ? "booked"
           : "empty";
       d.seat_status = seat_status;
     });
-    left_3.map((d) => {
+    left_3.forEach((d) => {
       var seat_status =
         seatExists.length > 0 && seatExists.includes(d.seat_no)
           ? "booked"
           : "empty";
       d.seat_status = seat_status;
     });
-    right_1.map((d) => {
+    right_1.forEach((d) => {
       var seat_status =
         seatExists.length > 0 && seatExists.includes(d.seat_no)
           ? "booked"
           : "empty";
       d.seat_status = seat_status;
     });
-    right_2.map((d) => {
+    right_2.forEach((d) => {
       var seat_status =
         seatExists.length > 0 && seatExists.includes(d.seat_no)
           ? "booked"
           : "empty";
       d.seat_status = seat_status;
     });
-    right_3.map((d) => {
+    right_3.forEach((d) => {
       var seat_status =
         seatExists.length > 0 && seatExists.includes(d.seat_no)
           ? "booked"
