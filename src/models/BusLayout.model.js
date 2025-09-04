@@ -23,7 +23,7 @@ const busLayoutSchema = new mongoose.Schema({
     },
     combine_seats:{
       type:[Object],
-      default:{}
+      default:[]
     },
     seat_numbers:{
       type:String,
