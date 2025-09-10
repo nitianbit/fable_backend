@@ -477,6 +477,75 @@ module.exports = {
       });
     }
   },
+  applyReferral: async (req, res) => {
+    try {
+      const { userId } = req.session;
+      const { referralCode } = req.body;
+
+      if (!referralCode) {
+        return res.status(400).json({
+          status: false,
+          message: "Referral code is required"
+        });
+      }
+
+      // Check if user already has a referral
+      const existingReferral = await UserReferral.findOne({ userId });
+      if (existingReferral) {
+        return res.status(400).json({
+          status: false,
+          message: "User already has an active referral"
+        });
+      }
+
+      // Find the referrer
+      const referrer = await User.findOne({ refercode: referralCode });
+      if (!referrer) {
+        return res.status(400).json({
+          status: false,
+          message: "Invalid referral code"
+        });
+      }
+
+      if (referrer._id.toString() === userId.toString()) {
+        return res.status(400).json({
+          status: false,
+          message: "Cannot apply your own referral code"
+        });
+      }
+
+      // Create referral record
+      const referral = await UserReferral.create(userId, referralCode);
+
+      if (referral) {
+        res.json({
+          status: true,
+          message: "Referral code applied successfully",
+          data: {
+            referrer: {
+              id: referrer._id,
+              name: `${referrer.firstname} ${referrer.lastname}`,
+              phone: referrer.phone
+            },
+            amount: referral.amount,
+            startDate: referral.start_date,
+            endDate: referral.end_date
+          }
+        });
+      } else {
+        res.status(400).json({
+          status: false,
+          message: "Failed to apply referral code"
+        });
+      }
+    } catch (err) {
+      res.status(500).json({
+        status: false,
+        message: "Failed to apply referral code",
+        errorMessage: err.message,
+      });
+    }
+  },
   wallettransactions: async (req, res) => {
     try {
       const { walletId, userId } = req.session;

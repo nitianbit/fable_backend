@@ -114,6 +114,41 @@ All endpoints require authentication except registration with referral.
 
 ---
 
+## 4. Apply Referral Code (Existing User)
+
+**Endpoint:** `POST /apply-referral`
+
+**Description:** Apply a referral code for an existing authenticated user.
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "referralCode": "ABC123"
+}
+```
+
+**Response:**
+```json
+{
+  "status": true,
+  "message": "Referral code applied successfully",
+  "data": {
+    "referrer": {
+      "id": "user_id",
+      "name": "John Doe",
+      "phone": "9876543210"
+    },
+    "amount": "100",
+    "startDate": "2025-09-10T00:00:00.000Z",
+    "endDate": "2025-10-10T00:00:00.000Z"
+  }
+}
+```
+
+---
+
 ## Frontend Integration Guide
 
 ### 1. Display Referral Code/Link
@@ -185,7 +220,37 @@ const registerWithReferral = async (phone, countryCode, referralCode) => {
 };
 ```
 
-### 3. Share Referral Link
+### 3. Apply Referral Code (Existing User)
+
+```javascript
+const applyReferralCode = async (referralCode) => {
+  try {
+    const response = await fetch('/api/users/apply-referral', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${userToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        referralCode: referralCode
+      })
+    });
+    const data = await response.json();
+    if (data.status) {
+      // Show success message
+      alert('Referral code applied successfully!');
+      // Update UI to show referral benefits
+    } else {
+      // Show error message
+      alert(data.message);
+    }
+  } catch (error) {
+    console.error('Error applying referral code:', error);
+  }
+};
+```
+
+### 4. Share Referral Link
 
 ```javascript
 const shareReferralLink = async () => {
@@ -228,6 +293,11 @@ const shareReferralLink = async () => {
 
 {
   "status": false,
+  "message": "Referral code is required"
+}
+
+{
+  "status": false,
   "message": "Kindly update your profile to generate refercode"
 }
 ```
@@ -240,7 +310,8 @@ const shareReferralLink = async () => {
 2. **Referral Validity:** 30 days from the date of application
 3. **Reward Amount:** ₹100 per successful referral
 4. **Payment Status:** Changes to 'Completed' after the validity period and successful trips
-5. **Referral During Registration:** Users can only use a referral code during the registration process
+5. **Referral Application:** Users can apply referral codes either during registration or as existing users
+6. **One Referral Per User:** Each user can only apply one referral code
 
 ---
 
@@ -248,8 +319,8 @@ const shareReferralLink = async () => {
 
 - All referral endpoints (except registration) require authentication
 - Referral codes are validated against existing users
-- Users cannot use their own referral codes
-- Referral codes can only be used during registration
+- Users cannot apply their own referral codes
+- One-time application per user
 
 ---
 
@@ -263,10 +334,20 @@ const shareReferralLink = async () => {
    - Register user B with user A's referral code in the URL
    - Verify referral record is created
 
-2. **Invalid Referral Code:**
-   - Try to register with non-existent referral code
+2. **Valid Referral Application for Existing User:**
+   - Register user A and user B
+   - Login as user B
+   - Apply user A's referral code using POST /apply-referral
+   - Verify referral record is created
+
+3. **Invalid Referral Code:**
+   - Try to apply non-existent referral code
    - Should return error message
 
-3. **Self-Referral Prevention:**
-   - Try to register with user's own referral code
+4. **Self-Referral Prevention:**
+   - Try to apply user's own referral code
+   - Should return error message
+
+5. **Duplicate Referral Prevention:**
+   - Try to apply referral code when user already has one
    - Should return error message
