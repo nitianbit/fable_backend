@@ -44,7 +44,7 @@ router.get('/refercode', authenticate, userController.referral);  // done. // do
 
 router.get('/referlink', authenticate, userController.referlink);  // done
 
-router.post('/addmoney', authenticate, userController.addmoney);  // done , razorPay pending 
+router.post('/addmoney', authenticate, userController.addmoney);  // done , razorPay pending
 router.post('/payment/verify', authenticate, userController.verifypayment);   // razorPay pending
 
 router.post('/referrallink/:referral', authenticate, userController.referrallink);  // done
