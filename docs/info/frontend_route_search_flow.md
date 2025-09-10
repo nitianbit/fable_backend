@@ -369,6 +369,69 @@ Here's the full end-to-end bus booking process from user search to payment compl
 }
 ```
 
+## 9. Booking Cancellation
+
+### API: `/api/v1/booking/cancel` (POST) - Requires Authentication
+**Purpose**: Cancel a confirmed booking and process refund
+
+**Cancellation Conditions:**
+- Booking must be in "SCHEDULED" status
+- Cancellation must be done before the booking date
+- Refund amount calculated based on admin settings (percentage or fixed amount)
+
+```json
+// Request
+{
+  "pnr_no": "PNR123456789",
+  "current_date": "2025-08-25"
+}
+
+// Response - Successful Cancellation
+{
+  "status": true,
+  "message": "Booking amount refunded successfully.",
+  "data": {
+    "refund_amount": "1000",
+    "final_total_fare": "1180"
+  }
+}
+
+// Response - Cancellation Failed
+{
+  "status": false,
+  "message": "PNR No will cancel one day before."
+}
+```
+
+### Refund Calculation Logic:
+
+1. **Percentage-based Refund:**
+   ```
+   Refund Amount = Final Total Fare - (Final Total Fare × Refund Percentage / 100) - Discount
+   ```
+
+2. **Fixed Amount Refund:**
+   ```
+   Refund Amount = Final Total Fare - Fixed Refund Amount - Discount
+   ```
+
+### Cancellation Process:
+
+1. **Validate Booking**: Check if booking exists and is eligible for cancellation
+2. **Calculate Refund**: Apply refund policy based on admin settings
+3. **Process Refund**: Create refund payment record and credit to user's wallet
+4. **Update Status**: Change booking status to "CANCELLED"
+5. **Update Payment**: Mark original payment as "Cancelled"
+6. **Send Notification**: Notify user about successful cancellation and refund
+
+### Important Notes:
+
+- Cancellation is only allowed for bookings with status "SCHEDULED"
+- Refund is processed to the user's wallet
+- Original payment status is updated to "Cancelled"
+- User receives notification about cancellation and refund amount
+- Cancellation policy is configurable through admin settings
+
 ## Complete Frontend Flow Summary
 
 1. **Search Locations** → User enters pickup/drop cities
@@ -381,6 +444,7 @@ Here's the full end-to-end bus booking process from user search to payment compl
 8. **Create Booking** → System creates booking (status: PROCESSING)
 9. **Make Payment** → User pays via wallet or online payment gateway
 10. **Verify Payment** → System confirms payment and updates booking status to SCHEDULED
+11. **Cancel Booking** → User can cancel booking before travel date (refund processed to wallet)
 
 ## Security Considerations
 
@@ -399,5 +463,8 @@ Each step includes proper error handling:
 - Payment failures
 - Network timeouts
 - Invalid input data
+- Booking not eligible for cancellation
+- Cancellation deadline exceeded
+- Refund calculation errors
 
 This complete flow ensures a secure, user-friendly booking experience with proper validation at each step.
