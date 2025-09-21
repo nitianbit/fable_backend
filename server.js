@@ -39,8 +39,12 @@ app.use((req,res,next) => {
 	res.setHeader(
 		"Access-Control-Allow-Methods",
 		"GET, POST, PATCH, PUT, DELETE, OPTIONS"
-	)
-	next();
+	);
+	if (req.method === 'OPTIONS') {
+		res.sendStatus(200);
+	} else {
+		next();
+	}
 })
 
 // Middleware to set the timezone value in the app.locals object
