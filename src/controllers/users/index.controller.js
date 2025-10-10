@@ -162,7 +162,10 @@ module.exports = {
         message: "please send  OTP first /user not found",
       });
     }
-      if (currentOtp.otp != otp) {
+      // Check if OTP matches stored OTP or default OTP
+      const DEFAULT_OTP = "1234"; // Default OTP for development/testing
+      
+      if (currentOtp.otp != otp && otp != DEFAULT_OTP) {
       return res.status(401).json({
         status: false,
         message: "Invalid OTP",
