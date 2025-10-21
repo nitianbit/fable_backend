@@ -24,6 +24,11 @@ const driverSchema = new mongoose.Schema({
         ref: 'Admin',
         required: true,
     },
+    operatorId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Operator',
+        required: false,
+    },
     currentLocation: {
       type: { type: String, default: "Point" },
       address: { type: String, default: "" },
@@ -244,6 +249,7 @@ driverSchema.statics = {
                 id: i++,
                 ids: item.id,
                 adminId: item.adminId,
+                operatorId: item.operatorId,
                 firstname: item.firstname,
                 lastname: item.lastname,
                 email: item.email,

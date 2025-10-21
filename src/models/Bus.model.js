@@ -10,6 +10,11 @@ const busSchema = new mongoose.Schema({
         ref: "Admin",
         required: true,
       },
+      operatorId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Operator",
+        required: false,
+      },
       bustypeId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Bus_Type",

@@ -22,7 +22,8 @@ const nearestData = async (
   dropoffLatitude,
   dropoffId,
   current_date,
-  current_time
+  current_time,
+  operator_id = null
 ) => {
   const currentDateTime = `${current_time}T${current_time}:00.000Z`;
   const timezone = DEFAULT_TIMEZONE;
@@ -279,6 +280,26 @@ const nearestData = async (
     {
       $unwind: "$bus",
     },
+    // Filter by operator_id if provided
+    ...(operator_id ? [{
+      $match: {
+        "bus.operatorId": mongoose.Types.ObjectId(operator_id)
+      }
+    }] : []),
+    {
+      $lookup: {
+        from: "operators",
+        localField: "bus.operatorId",
+        foreignField: "_id",
+        as: "operator",
+      },
+    },
+    {
+      $unwind: {
+        path: "$operator",
+        preserveNullAndEmptyArrays: true
+      },
+    },
     {
       $lookup: {
         from: "bus_schedule_locations",
@@ -309,6 +330,14 @@ const nearestData = async (
           model_no: { $ifNull: ["$bus.model_no", "-"] },
           chassis_no: { $ifNull: ["$bus.chassis_no", "-"] },
           amenities: { $ifNull: ["$bus.amenities", []] },
+          operatorId: { $ifNull: ["$bus.operatorId", null] },
+        },
+        operator_details: {
+          id: { $ifNull: ["$operator._id", null] },
+          companyName: { $ifNull: ["$operator.companyName", "-"] },
+          companyCode: { $ifNull: ["$operator.companyCode", "-"] },
+          businessType: { $ifNull: ["$operator.businessType", "-"] },
+          status: { $ifNull: ["$operator.status", "-"] },
         },
         pickup_stop_id: "$stopId",
         pickup_stop_name: "$stop.title",

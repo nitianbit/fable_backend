@@ -2,6 +2,7 @@ const express = require('express');
 
 const usersRoute = require('./users');
 const driversRoute = require('./drivers');
+const operatorRoute = require('./operator');
 const locationRoute = require('./location');
 const settingRoute = require('./setting');
 const routeRoute = require('./route');
@@ -16,6 +17,7 @@ const router = express.Router();
 
 router.use('/users', usersRoute);
 router.use('/drivers', driversRoute);
+router.use('/operators', operatorRoute);
 router.use('/searches', locationRoute);
 router.use('/routes', routeRoute);
 router.use('/buses', busRoute);

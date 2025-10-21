@@ -1,5 +1,6 @@
 module.exports.User = require('./User.model');
 module.exports.UserReferral = require("./UserReferral.model");
+module.exports.Operator = require('./Operator.model');
 module.exports.Driver = require('./Driver.model');
 module.exports.Session = require('./Session.model');
 module.exports.Booking = require('./Booking.model');

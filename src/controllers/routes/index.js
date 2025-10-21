@@ -50,6 +50,7 @@ module.exports = {
         end_date,
         current_time,
         type,
+        operator_id,
       } = req.body;
 
       // If city names are provided, find locations by city
@@ -87,7 +88,8 @@ module.exports = {
         parseFloat(drop_lat),
         drop_id,
         current_date,
-        current_time
+        current_time,
+        operator_id
       );
       if (getnearestData.length > 0) {
         res.status(200).json({
