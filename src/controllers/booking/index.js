@@ -247,7 +247,7 @@ module.exports = {
       const { fareData, passengerDetailsItem, offer_code } = req.body;
       // Start session
       await session.startTransaction();
-      const seats = fareData.seat_no.replace(/\[|\]/g, "").split(","); // convert string to Array
+      const seats = fareData.seat_no.replace(/\[|\]|"/g, "").split(",").map(seat => seat.trim()); // convert string to Array and clean quotes
       const passengers = seats.length;
       const walletBalance = await Wallet.findById(walletId);
       var saveObj = {};
@@ -1145,45 +1145,81 @@ module.exports = {
                 }
               );
               const pnr_no = razorPaymentStatus.notes.booking_pnr_no;
-              const updateBooking = await Booking.findOneAndUpdate(
-                {
-                  pnr_no,
-                },
-                {
-                  travel_status: "SCHEDULED",
-                },
-                {
-                  new: true,
+              
+              // If pnr_no is empty, try to find booking by orderId from Payment table
+              let updateBooking;
+              if (pnr_no && pnr_no.trim() !== '') {
+                updateBooking = await Booking.findOneAndUpdate(
+                  {
+                    pnr_no,
+                  },
+                  {
+                    travel_status: "SCHEDULED",
+                  },
+                  {
+                    new: true,
+                  }
+                );
+              } else {
+                // Fallback: Find booking through Payment table
+                const paymentRecord = await Payment.findOne({ orderId }).populate('bookingId');
+                if (paymentRecord && paymentRecord.bookingId) {
+                  updateBooking = await Booking.findByIdAndUpdate(
+                    paymentRecord.bookingId,
+                    {
+                      travel_status: "SCHEDULED",
+                    },
+                    {
+                      new: true,
+                    }
+                  );
                 }
-              );
-
-              if (getUser.device_token) {
-                user.UserNotification(
-                  "Booking Confirmed",
-                  `Thanks for booking ferri shuttle for ${updateBooking.start_date}, Show your ticket Qr Code to Driver while boarding.We'll send driver detail in ticket when shuttle starts trip.`,
-                  "",
-                  getUser.device_token
-                ); //title,message,data,token
               }
 
-              res.status(200).json({
-                status: true,
-                message: "payment verified successfully.",
-                verification: "success",
-                data: {
-                  pnr_no: updateBooking.pnr_no,
-                  final_total_fare: updateBooking.final_total_fare,
-                },
-              });
+              if (updateBooking) {
+                if (getUser.device_token) {
+                  user.UserNotification(
+                    "Booking Confirmed",
+                    `Thanks for booking ferri shuttle for ${updateBooking.start_date}, Show your ticket Qr Code to Driver while boarding.We'll send driver detail in ticket when shuttle starts trip.`,
+                    "",
+                    getUser.device_token
+                  ); //title,message,data,token
+                }
+
+                res.status(200).json({
+                  status: true,
+                  message: "payment verified successfully.",
+                  verification: "success",
+                  data: {
+                    pnr_no: updateBooking.pnr_no,
+                    final_total_fare: updateBooking.final_total_fare,
+                  },
+                });
+              } else {
+                res.status(200).json({
+                  status: false,
+                  message: "Booking not found for this payment.",
+                  verification: "failed",
+                });
+              }
             } else if (
               await Payment.exists({ orderId, payment_status: "Completed" })
             ) {
+              // Try to get PNR from payment record if not available in notes
+              let pnr_no = razorPaymentStatus.notes.booking_pnr_no;
+              if (!pnr_no || pnr_no.trim() === '') {
+                const paymentRecord = await Payment.findOne({ orderId }).populate('bookingId');
+                if (paymentRecord && paymentRecord.bookingId) {
+                  pnr_no = paymentRecord.bookingId.pnr_no;
+                }
+              }
+              
               res.status(200).json({
                 status: true,
                 message: "payment verified successfully.",
                 verification: "success",
                 data: {
-                  pnr_no: razorPaymentStatus.notes.booking_pnr_no,
+                  pnr_no: pnr_no || "",
                   final_total_fare: razorPaymentStatus.amount,
                 },
               });
@@ -1304,6 +1340,13 @@ module.exports = {
                 getBookingLog.ip
               );
               if (getBookingIds) {
+                // Get the PNR numbers from the created bookings
+                const createdBookings = await Booking.find({
+                  _id: { $in: getBookingIds }
+                }).select('pnr_no').lean();
+                
+                const pnrNumbers = createdBookings.map(booking => booking.pnr_no).join(', ');
+
                 let ObjPayment = {
                   bookingId: getBookingIds,
                   bookingLogId: getBookingLog._id,
@@ -1354,7 +1397,7 @@ module.exports = {
                     message: "payment verified successfully.",
                     verification: "success",
                     data: {
-                      pnr_no: "",
+                      pnr_no: pnrNumbers,
                       final_total_fare: getBookingLog.total_amount,
                     },
                   });

@@ -1,5 +1,6 @@
 const Utils = require("../../utils/utils");
 const routeUtils = require("../../utils/route.utils");
+const mongoose = require("mongoose");
 const {
     SearchAddress,
     Setting,
@@ -10,7 +11,8 @@ const {
     Bus,
     BusLayout,
     UserReferral,
-	Wallet
+    Wallet,
+    Booking
 } = require("../../models");
 const _ = require("lodash");
 const objectIdToTimestamp = require("objectid-to-timestamp");
@@ -49,19 +51,10 @@ const {
                 });
             }
 
-            // Transform bus layout to get seat data
-            const transformedLayout = await BusLayout.transformData(
-                busschedule_id, 
-                busId, 
-                getbus.buslayoutId, 
-                current_date, 
-                ''
-            );
-
-            // Extract all seats from the layout
+            // Get all seat numbers from bus layout first
             const allSeats = [];
-            if (transformedLayout && transformedLayout.combine_seats) {
-                transformedLayout.combine_seats.forEach(row => {
+            if (getbus.buslayoutId && getbus.buslayoutId.combine_seats) {
+                getbus.buslayoutId.combine_seats.forEach(row => {
                     if (Array.isArray(row)) {
                         row.forEach(seat => {
                             if (seat && seat.seat_no) {
@@ -71,6 +64,37 @@ const {
                     }
                 });
             }
+
+            // Get booked seats directly from Booking model
+            const bookedSeats = await Booking.find({
+                busscheduleId: mongoose.Types.ObjectId(busschedule_id),
+                busId: mongoose.Types.ObjectId(busId),
+                travel_status: { 
+                    $in: ["PROCESSING", "SCHEDULED", "ACCEPTED", "ASSIGNED", "STARTED", "ARRIVED", "ONBOARDED"] 
+                },
+                is_deleted: { $ne: true },
+                bus_depature_date: {
+                    $gte: new Date(current_date),
+                    $lte: new Date(current_date)
+                }
+            }).select('seat_nos').lean();
+
+            // Create seat status map
+            const seatStatusMap = {};
+            const allBookedSeats = [];
+            
+            // Extract all booked seat numbers
+            bookedSeats.forEach(booking => {
+                if (booking.seat_nos && Array.isArray(booking.seat_nos)) {
+                    allBookedSeats.push(...booking.seat_nos);
+                }
+            });
+
+            // Set status for each seat
+            allSeats.forEach(seatNo => {
+                const isBooked = allBookedSeats.includes(seatNo);
+                seatStatusMap[seatNo] = isBooked ? 'booked' : 'empty';
+            });
 
             // Calculate prices for each seat
             const seatPrices = {};
@@ -130,7 +154,7 @@ const {
                             totalPrice: seatFare.final_total_fare / seatFare.no_of_seats,
                             tax: seatFare.tax_amount / seatFare.no_of_seats,
                             seatNo: seatNo,
-                            status: seatFare.seat_no && seatFare.seat_no.includes(seatNo) ? "empty" : "unavailable"
+                            status: seatStatusMap[seatNo] || "empty"
                         };
                     } catch (error) {
                         console.log(`Error calculating price for seat ${seatNo}:`, error);
@@ -139,7 +163,7 @@ const {
                             totalPrice: 0,
                             tax: 0,
                             seatNo: seatNo,
-                            status: "unavailable"
+                            status: seatStatusMap[seatNo] || "unavailable"
                         };
                     }
                 }

@@ -74,6 +74,9 @@ RouteStopSchema.statics = {
     // Remove any leading or trailing spaces
     inputString = inputString.trim();
 
+    // Remove brackets and quotes from the input string
+    inputString = inputString.replace(/\[|\]|"/g, "");
+
     // Check if the inputString contains a comma
     if (inputString.includes(",")) {
       // Split the string into an array using comma as the separator

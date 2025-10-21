@@ -318,36 +318,72 @@ BookingSchema.statics = {
         });
         return selectableItems;
     },
-    async bookingExists(busscheduleId, busId, seat_nos, current_date,end_date) {
+    async bookingExists(busscheduleId, busId, seat_nos, current_date, end_date) {
         try {
+            // Parse seat numbers properly
+            let trimseat_nos = seat_nos.split(",").map(function (item) { 
+                return item.trim().replace(/\[|\]/g, ''); 
+            });
+            
+            // Build query conditions
+            const queryConditions = {
+                busscheduleId: mongoose.Types.ObjectId(busscheduleId),
+                busId: mongoose.Types.ObjectId(busId),
+                seat_nos: { $in: trimseat_nos },
+                // Include all active booking statuses, not just SCHEDULED
+                travel_status: { 
+                    $in: ["PROCESSING", "SCHEDULED", "ACCEPTED", "ASSIGNED", "STARTED", "ARRIVED", "ONBOARDED"] 
+                },
+                is_deleted: { $ne: true } // Exclude deleted bookings
+            };
 
-          // let currentDate = moment(current_date).tz(DEFAULT_TIMEZONE).utc().toDate();
-           // let endDate = moment(end_date).tz(DEFAULT_TIMEZONE).utc().toDate();
-           let trimseat_nos = seat_nos.split(",").map(function (item) { return item.trim() })
-           const getBookedSeats = await this.find({
-               busscheduleId : mongoose.Types.ObjectId(busscheduleId),
-               busId: mongoose.Types.ObjectId(busId),
-               seat_nos: { $in: trimseat_nos },
-                bus_depature_date: (end_date && current_date) ? {
-                   $gte: new Date(current_date),
-                   $lte:new Date(end_date)
-               } : new Date(current_date),
-               travel_status: "SCHEDULED"
-           });
-           let new_seat_nos = [];
-            if (getBookedSeats) {
-                for (dseats of getBookedSeats) {
-                    if(dseats.seat_nos.length  == 1){
-                        new_seat_nos.push(dseats.seat_nos.toString())
-                    }else{
+            // Handle date filtering
+            if (end_date && current_date) {
+                // For date range queries
+                queryConditions.bus_depature_date = {
+                    $gte: new Date(current_date),
+                    $lte: new Date(end_date)
+                };
+            } else if (current_date) {
+                // For single date queries - match the exact date
+                const startOfDay = new Date(current_date);
+                startOfDay.setHours(0, 0, 0, 0);
+                const endOfDay = new Date(current_date);
+                endOfDay.setHours(23, 59, 59, 999);
+                
+                queryConditions.bus_depature_date = {
+                    $gte: startOfDay,
+                    $lte: endOfDay
+                };
+            }
+
+            console.log("Booking query conditions:", JSON.stringify(queryConditions, null, 2));
+            
+            const getBookedSeats = await this.find(queryConditions).lean();
+            
+            console.log("Found booked seats:", getBookedSeats.length);
+            
+            let new_seat_nos = [];
+            if (getBookedSeats && getBookedSeats.length > 0) {
+                for (let dseats of getBookedSeats) {
+                    if (dseats.seat_nos && Array.isArray(dseats.seat_nos)) {
+                        // Handle array of seat numbers
                         new_seat_nos.push(...dseats.seat_nos);
+                    } else if (dseats.seat_nos) {
+                        // Handle single seat number
+                        new_seat_nos.push(dseats.seat_nos.toString());
                     }
                 }
-                return new_seat_nos;
-            } else {
-                return [];
+                
+                // Remove duplicates and filter out empty strings
+                new_seat_nos = [...new Set(new_seat_nos)].filter(seat => seat && seat.trim() !== '');
+                
+                console.log("Processed booked seat numbers:", new_seat_nos);
             }
+            
+            return new_seat_nos;
         } catch (err) {
+            console.error("Error in bookingExists:", err);
             return [];
         }
     },
@@ -388,3 +424,6 @@ BookingSchema.plugin(require('@hilarion/mongoose-activity-logger'));
 
 
 module.exports = mongoose.model('Booking', BookingSchema);
+
+
+

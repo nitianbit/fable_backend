@@ -67,6 +67,7 @@ module.exports = {
         endDate
       });
 
+      // Get all booked seats for this bus schedule and date
       const seatExists = await Booking.bookingExists(
         busscheduleId,
         busId,
@@ -95,8 +96,10 @@ module.exports = {
       const updateSeatStatus = (seatArray) => {
         seatArray.forEach((seat) => {
           if (seat && seat.seat_no) {
-            // Check if this seat is booked
-            const isBooked = seatExists.length > 0 && seatExists.includes(seat.seat_no);
+            // Check if this seat is booked - use exact string matching
+            const isBooked = seatExists.length > 0 && seatExists.some(bookedSeat => 
+              bookedSeat.toString().trim() === seat.seat_no.toString().trim()
+            );
             seat.seat_status = isBooked ? "booked" : "empty";
             
             // Log for debugging
