@@ -8,6 +8,7 @@ const router = express.Router();
 
 
 router.post('/:busId', authenticate,routebusController.searchseats);
+router.post('/:busId/seat-prices', authenticate, routebusController.getSeatPrices);
 
 
 
