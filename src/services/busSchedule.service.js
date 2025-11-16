@@ -25,6 +25,18 @@ const nearestData = async (
   current_time,
   operator_id = null
 ) => {
+  // Validate operator_id if provided
+  let validOperatorId = null;
+  if (operator_id && (typeof operator_id === 'string' ? operator_id.trim() !== '' : true)) {
+    try {
+      if (mongoose.Types.ObjectId.isValid(operator_id)) {
+        validOperatorId = mongoose.Types.ObjectId(operator_id);
+      }
+    } catch (err) {
+      validOperatorId = null;
+    }
+  }
+  
   const currentDateTime = `${current_time}T${current_time}:00.000Z`;
   const timezone = DEFAULT_TIMEZONE;
   const currentTime = new Date(`${current_date} ${current_time}`);
@@ -281,9 +293,9 @@ const nearestData = async (
       $unwind: "$bus",
     },
     // Filter by operator_id if provided
-    ...(operator_id ? [{
+    ...(validOperatorId ? [{
       $match: {
-        "bus.operatorId": mongoose.Types.ObjectId(operator_id)
+        "bus.operatorId": validOperatorId
       }
     }] : []),
     {
@@ -419,6 +431,23 @@ const nearestData = async (
     {
       $unwind: "$route",
     },
+    {
+      $lookup: {
+        from: "buses",
+        localField: "busSchedule.busId",
+        foreignField: "_id",
+        as: "bus",
+      },
+    },
+    {
+      $unwind: "$bus",
+    },
+    // Filter by operator_id if provided
+    ...(validOperatorId ? [{
+      $match: {
+        "bus.operatorId": validOperatorId
+      }
+    }] : []),
     {
       $project: {
         _id: 0,

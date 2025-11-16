@@ -30,6 +30,7 @@ const settingSchema = new mongoose.Schema(
       driver_online_location_update_interval: { type: Number, default: 1000 },
       max_distance: { type: Number, default: 2000 },
       prebooking_time: { type: Number, default: 30 },
+      max_seats_per_booking: { type: Number, index: true, default: 10 },
     },
     smtp: {
       is_production: { type: Boolean, default: false },

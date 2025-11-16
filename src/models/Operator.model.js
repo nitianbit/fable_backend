@@ -210,6 +210,12 @@ const operatorSchema = new mongoose.Schema({
     verifiedAt: {
         type: Date,
     },
+    maxNoOfSeats: {
+        type: Number,
+        default: 50,
+        min: 1,
+        max: 100,
+    },
 }, {
     timestamps: true,
 });
@@ -247,7 +253,7 @@ operatorSchema.methods = {
             'licenseNumber', 'licenseExpiryDate', 'contactPerson', 'documents',
             'status', 'isVerified', 'fleetSize', 'maxFleetSize', 'commissionRate',
             'paymentTerms', 'description', 'website', 'socialMedia', 'language',
-            'createdAt', 'updatedAt', 'lastLoginAt', 'verifiedAt'
+            'createdAt', 'updatedAt', 'lastLoginAt', 'verifiedAt','maxNoOfSeats'
         ];
 
         fields.forEach((field) => {
@@ -298,6 +304,7 @@ operatorSchema.statics = {
                 contactPerson: item.contactPerson.name,
                 fleetSize: item.fleetSize,
                 maxFleetSize: item.maxFleetSize,
+                maxNoOfSeats: item.maxNoOfSeats,
                 status: item.status,
                 isVerified: item.isVerified ? 'Verified' : 'Not Verified',
                 createdAt: moment.utc(item.createdAt).tz("Asia/Kolkata").format("DD MMM YYYY"),

@@ -8,5 +8,6 @@ const router = express.Router();
 
 
 router.get('/commondata', authenticate, settingController.appSettings);
+router.get('/max-seats-per-booking', settingController.maxSeatsPerBooking);
 
 module.exports = router;

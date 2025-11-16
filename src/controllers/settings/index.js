@@ -66,4 +66,25 @@ module.exports = {
       });
     }
   },
+  maxSeatsPerBooking: async (req, res) => {
+    try {
+      const getSetting = await Setting.findOne({}, "general.max_seats_per_booking").lean();
+      const maxSeats = getSetting?.general?.max_seats_per_booking || 1;
+      
+      res.status(200).json({
+        status: true,
+        message: "Maximum seats per booking retrieved successfully",
+        data: {
+          max_seats_per_booking: maxSeats,
+        },
+      });
+    } catch (err) {
+      res.status(400).json({
+        status: false,
+        title: "Settings Error",
+        message: "Something went wrong while retrieving max seats per booking.",
+        errorMessage: err.message,
+      });
+    }
+  },
 };
